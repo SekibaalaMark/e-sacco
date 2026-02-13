@@ -1,5 +1,5 @@
 from rest_framework import serializers
-
+from django.contrib.auth.models import Group
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -29,4 +29,14 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User(**validated_data)
         user.set_password(password)
         user.save()
+
+        ordinary_group = Group.objects.get(name='Ordinary')
+        user.groups.add(ordinary_group)
         return user
+    
+
+
+
+
+
+
