@@ -30,7 +30,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
 
-        ordinary_group = Group.objects.get(name='Ordinary')
+        ordinary_group, _ = Group.objects.get(name='Ordinary')  # even if the group doesn't exist no app crash
         user.groups.add(ordinary_group)
         return user
     
