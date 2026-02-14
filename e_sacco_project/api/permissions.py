@@ -9,3 +9,8 @@ class IsAdmin(BasePermission):
 class IsTreasurer(BasePermission):
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.groups.filter(name="Treasurer").exists()
+    
+
+class IsOrdinary(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.groups.filter(name="Ordinary").exists()
