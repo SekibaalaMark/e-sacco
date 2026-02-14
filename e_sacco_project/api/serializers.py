@@ -33,7 +33,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         ordinary_group, _ = Group.objects.get(name='Ordinary')  # even if the group doesn't exist no app crash
         user.groups.add(ordinary_group)
         return user
-    
+
+
 
 
 
