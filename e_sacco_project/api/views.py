@@ -94,8 +94,9 @@ class VerifyEmailView(APIView):
 
 
 
-
+from rest_framework.throttling import AnonRateThrottle
 class ResendVerificationView(APIView):
+    throttle_classes = [AnonRateThrottle]
     def post(self, request):
         email = request.data.get('email')
         
