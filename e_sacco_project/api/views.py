@@ -87,3 +87,34 @@ class VerifyEmailView(APIView):
         
         # 3. If something is wrong (token expired or tampered with)
         return Response({"error": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
+    
+
+
+
+
+
+
+
+class ResendVerificationView(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        
+        if not email:
+            return Response({"error": "Email is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = CustomUser.objects.get(email=email)
+            
+            # 1. Check if the user is already verified
+            if user.is_verified:
+                return Response({"message": "This account is already verified."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # 2. Trigger a new email with a fresh token
+            send_verification_email(user, request)
+            
+            return Response({"message": "A new verification link has been sent to your email."}, status=status.HTTP_200_OK)
+
+        except CustomUser.DoesNotExist:
+            # Security Tip: We return 200 even if the user doesn't exist 
+            # to prevent "Email Enumeration" (hackers checking which emails are registered).
+            return Response({"message": "If an account exists with this email, a link has been sent."}, status=status.HTTP_200_OK)
