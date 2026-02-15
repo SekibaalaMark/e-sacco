@@ -7,25 +7,37 @@ from django.utils.http import urlsafe_base64_decode
 from .models import CustomUser
 
 
+from .utils import send_verification_email # Make sure this is imported
+
 class RegisterAPIView(APIView):
-    
-    def post(self,request):
+    def post(self, request):
         serializer = RegisterSerializer(data=request.data)
 
         if serializer.is_valid():
+            # 1. Save the user (they should have is_verified=False by default)
             user = serializer.save()
+
+            # 2. Trigger the email sending logic
+            try:
+                send_verification_email(user, request)
+                email_status = "Verification email sent."
+            except Exception as e:
+                # Log the error (optional) and notify the user
+                email_status = "User registered, but verification email failed to send."
+
             return Response(
                 {
-                    "message": "User registered succesfully",
-                    "user":{
+                    "message": "User registered successfully",
+                    "email_status": email_status,
+                    "user": {
                         "username": user.username,
                         "email": user.email,
                         "phone_number": user.phone_number
                     }
-                },status=status.HTTP_201_CREATED
+                }, status=status.HTTP_201_CREATED
             )
-        return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-
+            
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
