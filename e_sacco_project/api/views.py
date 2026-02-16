@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import RegisterSerializer
+from .serializers import *
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_decode
 from .models import CustomUser
@@ -66,10 +66,6 @@ class VerifyEmailView(APIView):
 
 
 
-
-from django.contrib.auth import get_user_model
-
-
 class VerifyEmailView(APIView):
     def get(self, request, uidb64, token):
         try:
@@ -119,3 +115,11 @@ class ResendVerificationView(APIView):
             # Security Tip: We return 200 even if the user doesn't exist 
             # to prevent "Email Enumeration" (hackers checking which emails are registered).
             return Response({"message": "If an account exists with this email, a link has been sent."}, status=status.HTTP_200_OK)
+        
+
+
+
+from rest_framework_simplejwt.views import TokenObtainPairView
+
+class LoginView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
