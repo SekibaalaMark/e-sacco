@@ -123,3 +123,18 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 class LoginView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
+
+
+
+from rest_framework.permissions import IsAuthenticated
+
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = LogoutSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response({"message": "Logged out successfully"}, status=status.HTTP_204_NO_CONTENT)
