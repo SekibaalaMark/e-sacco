@@ -9,4 +9,5 @@ urlpatterns = [
     path('verify-email/<str:uidb64>/<str:token>/', VerifyEmailView.as_view(), name='verify-email'),
     path('resend-verification/', ResendVerificationView.as_view(), name='resend-verification'),
     path('login/', LoginView.as_view(), name='login'), # Now protected!
+    path('logout/', LogoutView.as_view(), name='logout'),
 ]
