@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from django.contrib.auth.models import Group
 from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
 
 User = get_user_model()
 
@@ -34,6 +36,22 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.groups.add(ordinary_group)
         return user
 
+
+
+
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        # 1. Let the parent class handle the initial authentication (username/password)
+        data = super().validate(attrs)
+
+        # 2. At this point, self.user is available. Check the verification status.
+        if not self.user.is_verified:
+            raise serializers.ValidationError(
+                {"detail": "Your email address is not verified. Please check your inbox."}
+            )
+
+        return data
 
 
 
