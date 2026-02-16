@@ -39,7 +39,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 
-
+'''
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         # 1. Let the parent class handle the initial authentication (username/password)
@@ -52,7 +52,32 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
             )
 
         return data
+'''
 
+
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        # Add custom claims
+        # We grab all group names associated with the user
+        token['groups'] = list(user.groups.values_list('name', flat=True))
+        token['is_verified'] = user.is_verified
+        
+        return token
+
+    def validate(self, attrs):
+        if not self.user.is_verified:
+            raise serializers.ValidationError("Email not verified")
+
+        data = super().validate(attrs)
+        # Add the groups to the response body as well for immediate use
+        data['groups'] = list(self.user.groups.values_list('name', flat=True))
+        data['is_verified'] = self.user.is_verified
+        return data
 
 
 
