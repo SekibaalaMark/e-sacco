@@ -58,25 +58,27 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
 
-        # Add custom claims
-        # We grab all group names associated with the user
         token['groups'] = list(user.groups.values_list('name', flat=True))
         token['is_verified'] = user.is_verified
         
         return token
 
     def validate(self, attrs):
+        data = super().validate(attrs)   # ✅ Authenticate first
+
+        # Now self.user exists
         if not self.user.is_verified:
             raise serializers.ValidationError("Email not verified")
 
-        data = super().validate(attrs)
-        # Add the groups to the response body as well for immediate use
+        # Add extra response data
         data['groups'] = list(self.user.groups.values_list('name', flat=True))
         data['is_verified'] = self.user.is_verified
+
         return data
 
 
@@ -99,4 +101,9 @@ class LogoutSerializer(serializers.Serializer):
         except Exception:
             raise serializers.ValidationError("Invalid or expired token")
 
+
+
+class PromoteUserSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()
+    role = serializers.ChoiceField(choices=["Admin", "Treasurer"])
 
