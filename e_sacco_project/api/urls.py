@@ -10,4 +10,6 @@ urlpatterns = [
     path('resend-verification/', ResendVerificationView.as_view(), name='resend-verification'),
     path('login/', LoginView.as_view(), name='login'), # Now protected!
     path('logout/', LogoutView.as_view(), name='logout'),
+
+    path('promote-user/',PromoteUserView.as_view(),name='promote'),
 ]
