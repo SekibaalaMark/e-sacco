@@ -107,3 +107,30 @@ class PromoteUserSerializer(serializers.Serializer):
     user_id = serializers.IntegerField()
     role = serializers.ChoiceField(choices=["Admin", "Treasurer"])
 
+
+
+
+from rest_framework import serializers
+from .models import Savings
+import uuid
+
+class DepositSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Savings
+        fields = ['amount', 'provider']
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+
+        transaction_id = str(uuid.uuid4())
+
+        savings = Savings.objects.create(
+            user=user,
+            amount=validated_data['amount'],
+            provider=validated_data['provider'],
+            transaction_id=transaction_id,
+            status='PENDING'
+        )
+
+        return savings
