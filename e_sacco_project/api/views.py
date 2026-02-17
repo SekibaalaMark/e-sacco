@@ -206,3 +206,31 @@ class DepositView(APIView):
             "message": "Payment initiated",
             "transaction_id": savings.transaction_id
         })
+
+
+
+
+
+class PaymentCallbackView(APIView):
+
+    authentication_classes = []  # Usually no JWT
+    permission_classes = []      # Secured by provider secret
+
+    def post(self, request):
+
+        transaction_id = request.data.get("transaction_id")
+        payment_status = request.data.get("status")
+
+        try:
+            savings = Savings.objects.get(transaction_id=transaction_id)
+        except Savings.DoesNotExist:
+            return Response({"error": "Invalid transaction"}, status=404)
+
+        if payment_status == "SUCCESS":
+            savings.status = "SUCCESS"
+        else:
+            savings.status = "FAILED"
+
+        savings.save()
+
+        return Response({"message": "Callback received"})
