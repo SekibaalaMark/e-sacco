@@ -180,3 +180,29 @@ class PromoteUserView(APIView):
             "message": f"{target_user.username} promoted to {role_name}"
         }, status=status.HTTP_200_OK)
 
+
+
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from .serializers import DepositSerializer
+
+class DepositView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = DepositSerializer(
+            data=request.data,
+            context={'request': request}
+        )
+        serializer.is_valid(raise_exception=True)
+        savings = serializer.save()
+
+        # Here is where you call MTN/Airtel API
+
+        return Response({
+            "message": "Payment initiated",
+            "transaction_id": savings.transaction_id
+        })
