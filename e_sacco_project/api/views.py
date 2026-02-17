@@ -5,6 +5,7 @@ from .serializers import *
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_decode
 from .models import CustomUser
+from .permissions import *
 
 
 from .utils import send_verification_email # Make sure this is imported
@@ -138,3 +139,44 @@ class LogoutView(APIView):
         serializer.save()
 
         return Response({"message": "Logged out successfully"}, status=status.HTTP_204_NO_CONTENT)
+    
+
+
+
+
+
+
+
+class PromoteUserView(APIView):
+    permission_classes = [CanPromoteUsers]
+
+    def post(self, request):
+        serializer = PromoteUserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user_id = serializer.validated_data['user_id']
+        role_name = serializer.validated_data['role']
+
+        try:
+            target_user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=404)
+
+        # Remove all existing groups
+        target_user.groups.clear()
+
+        # Assign new role
+        group = Group.objects.get(name=role_name)
+        target_user.groups.add(group)
+
+        if target_user.is_superuser:
+            return Response(
+                            {"error": "Cannot modify a superuser"},
+                            status=status.HTTP_403_FORBIDDEN
+                                        )
+        
+
+        return Response({
+            "message": f"{target_user.username} promoted to {role_name}"
+        }, status=status.HTTP_200_OK)
+
